@@ -1,0 +1,32 @@
+services:
+  # Service Web Django
+  - type: web
+    name: red-product-api
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn red_product.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: red-product-db
+          property: connectionString
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: admin@redproduct.com
+      - key: DJANGO_SUPERUSER_PASSWORD
+        generateValue: true
+    autoDeploy: true
+
+databases:
+  # Base de données PostgreSQL
+  - name: red-product-db
+    databaseName: red_product
+    user: red_product_user
+    plan: free
