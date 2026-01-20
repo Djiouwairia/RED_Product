@@ -4,38 +4,41 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from hotels.models import Hotel
 from hotels.serializers import HotelSerializer, HotelListSerializer
-from django.db import models # Ajoute cette ligne
+from django.db import models
 
 
-class IsAdminOrReadOnly(permissions.BasePermission):
+class IsAuthenticatedOrAdmin(permissions.BasePermission):
+    """
+    Permission personnalisée:
+    - Lecture: Tous les utilisateurs authentifiés
+    - Création/Modification/Suppression: Admins uniquement (is_admin=True)
+    """
     def has_permission(self, request, view):
+        # Lecture autorisée pour tous les utilisateurs authentifiés
         if request.method in permissions.SAFE_METHODS:
             return request.user and request.user.is_authenticated
         
-        # Correction ici : utilise is_superuser ou is_staff
-        return request.user and request.user.is_authenticated and request.user.is_superuser
+        # Création/modification/suppression uniquement pour les admins
+        # Utiliser is_admin au lieu de is_superuser
+        return request.user and request.user.is_authenticated and (
+            request.user.is_admin or request.user.is_superuser or request.user.is_staff
+        )
     
     def has_object_permission(self, request, view, obj):
+        # Lecture autorisée pour tous
         if request.method in permissions.SAFE_METHODS:
             return True
-        # Correction ici aussi
-        return request.user.is_superuser
+        # Modification/suppression uniquement pour les admins
+        return request.user.is_admin or request.user.is_superuser or request.user.is_staff
 
 
 class HotelViewSet(viewsets.ModelViewSet):
     """
     ViewSet pour gérer les opérations CRUD sur les hôtels
-    
-    list: Retourner la liste de tous les hôtels
-    retrieve: Retourner les détails d'un hôtel
-    create: Créer un nouvel hôtel (admin uniquement)
-    update: Modifier un hôtel (admin uniquement)
-    partial_update: Modifier partiellement un hôtel (admin uniquement)
-    destroy: Supprimer un hôtel (admin uniquement)
     """
     queryset = Hotel.objects.all().select_related('created_by')
     serializer_class = HotelSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAuthenticatedOrAdmin]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nom', 'adresse', 'email']
     ordering_fields = ['nom', 'prix_par_nuit', 'created_at']

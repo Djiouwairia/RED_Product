@@ -30,11 +30,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['email', 'username', 'first_name', 'last_name', 'password', 'password2']
         extra_kwargs = {
-            'first_name': {'required': True},
-            'last_name': {'required': True},
+            'first_name': {'required': False},  # Changé de True à False
+            'last_name': {'required': False},   # Changé de True à False
+            'email': {'required': True},
+            'username': {'required': True},
         }
     
     def validate(self, attrs):
+        """Validation globale"""
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({
                 "password": "Les mots de passe ne correspondent pas."
@@ -54,7 +57,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
     
     def create(self, validated_data):
+        """Créer l'utilisateur"""
+        # Retirer password2 avant la création
         validated_data.pop('password2')
+        
+        # Créer l'utilisateur avec create_user pour hasher le password
         user = User.objects.create_user(**validated_data)
         return user
 
