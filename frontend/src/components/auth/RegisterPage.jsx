@@ -21,25 +21,49 @@ const RegisterPage = ({ onSwitchToLogin }) => {
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
-    setError('');
-    
-    if (!formData.acceptTerms) {
-      setError('Veuillez accepter les termes et conditions');
-      setLoading(false);
-      return;
-    }
-    
+  setLoading(true);
+  setError('');
+  
+  if (!formData.acceptTerms) {
+    setError('Veuillez accepter les termes et conditions');
+    setLoading(false);
+    return;
+  }
+
+  // Vérification locale du mot de passe
+  if (formData.password !== formData.password2) {
+    setError('Les mots de passe ne correspondent pas');
+    setLoading(false);
+    return;
+  }
+  
+  try {
+    // On crée un objet propre sans 'password2' ni 'acceptTerms'
+    const dataToSend = {
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      first_name: formData.first_name,
+      last_name: formData.last_name
+    };
+
+    await api.register(dataToSend);
+    setSuccess(true);
+    setTimeout(() => onSwitchToLogin(), 2000);
+  } catch (err) {
+    // On affiche le message d'erreur précis venant du backend
     try {
-      await api.register(formData);
-      setSuccess(true);
-      setTimeout(() => onSwitchToLogin(), 2000);
-    } catch (err) {
-      setError('Erreur lors de l\'inscription');
-    } finally {
-      setLoading(false);
+      const detailedError = JSON.parse(err.message);
+      // Exemple : "username: Ce nom est déjà pris"
+      const firstError = Object.entries(detailedError)[0];
+      setError(`${firstError[0]}: ${firstError[1][0]}`);
+    } catch (e) {
+      setError('Erreur lors de l\'inscription. Vérifiez vos informations.');
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (success) {
     return (
