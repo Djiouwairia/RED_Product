@@ -30,35 +30,31 @@ const RegisterPage = ({ onSwitchToLogin }) => {
     return;
   }
 
-  // Vérification locale du mot de passe
-  if (formData.password !== formData.password2) {
-    setError('Les mots de passe ne correspondent pas');
-    setLoading(false);
-    return;
-  }
+  // On prépare l'objet avec TOUS les champs attendus par Django
+  // Y compris password2 qui semble être requis par ton Serializer
+  const dataToSend = {
+    username: formData.username,
+    email: formData.email,
+    password: formData.password,
+    password2: formData.password2, // CE CHAMP EST REQUIS PAR TON BACKEND
+    first_name: formData.first_name,
+    last_name: formData.last_name
+  };
   
   try {
-    // On crée un objet propre sans 'password2' ni 'acceptTerms'
-    const dataToSend = {
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      first_name: formData.first_name,
-      last_name: formData.last_name
-    };
-
     await api.register(dataToSend);
     setSuccess(true);
     setTimeout(() => onSwitchToLogin(), 2000);
   } catch (err) {
-    // On affiche le message d'erreur précis venant du backend
+    // On affiche l'erreur propre venant de Django
     try {
       const detailedError = JSON.parse(err.message);
-      // Exemple : "username: Ce nom est déjà pris"
-      const firstError = Object.entries(detailedError)[0];
-      setError(`${firstError[0]}: ${firstError[1][0]}`);
+      // On extrait le premier message d'erreur (ex: pour password2)
+      const field = Object.keys(detailedError)[0];
+      const message = detailedError[field][0];
+      setError(`${field}: ${message}`);
     } catch (e) {
-      setError('Erreur lors de l\'inscription. Vérifiez vos informations.');
+      setError('Erreur lors de l\'inscription');
     }
   } finally {
     setLoading(false);
