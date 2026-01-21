@@ -1,28 +1,33 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
+// Nettoyage de l'URL pour éviter les doubles slashs //
+const API_URL = VITE_API_URL.endsWith('/') ? VITE_API_URL.slice(0, -1) : VITE_API_URL;
 
 const api = {
   register: async (data) => {
+    // Correction : Utilisation du chemin complet api/auth/register/
     const res = await fetch(`${API_URL}/auth/register/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText || 'Erreur lors de l\'inscription');
+      const errorData = await res.json(); // On tente de récupérer le JSON d'erreur de Django
+      throw new Error(JSON.stringify(errorData) || 'Erreur lors de l\'inscription');
     }
     return res.json();
   },
   
   login: async (email, password) => {
-    const res = await fetch(`${API_URL}/token/`, {
+    // Correction : Ton urls.py attend 'auth/login/' et non 'token/'
+    const res = await fetch(`${API_URL}/auth/login/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText || 'Identifiants incorrects');
+      const errorData = await res.json();
+      throw new Error(JSON.stringify(errorData) || 'Identifiants incorrects');
     }
     return res.json();
   },
@@ -40,6 +45,7 @@ const api = {
     const res = await fetch(`${API_URL}/hotels/`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
+      // Note: Pas de Content-Type ici, le navigateur le gère pour le FormData (images)
       body: formData,
     });
     if (!res.ok) {
@@ -50,6 +56,7 @@ const api = {
   },
   
   getDashboardStats: async (token) => {
+    // Vérification : urls.py indique 'auth/dashboard/stats/'
     const res = await fetch(`${API_URL}/auth/dashboard/stats/`, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
