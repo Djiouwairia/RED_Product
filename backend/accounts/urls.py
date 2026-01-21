@@ -10,6 +10,10 @@ from accounts.views import (
     UserListView,
     dashboard_stats,
 )
+from accounts.management_views import (
+    create_initial_superuser,
+    create_test_data,
+)
 
 app_name = 'accounts'
 
@@ -30,4 +34,8 @@ urlpatterns = [
     # Gestion du mot de passe
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('password-reset/', PasswordResetRequestView.as_view(), name='password-reset'),
+    
+    # Setup endpoints (À SUPPRIMER APRÈS UTILISATION)
+    path('setup/create-superuser/', create_initial_superuser, name='create-superuser'),
+    path('setup/create-test-data/', create_test_data, name='create-test-data'),
 ]
