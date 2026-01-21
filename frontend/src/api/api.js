@@ -1,6 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-
 const api = {
   register: async (data) => {
     const res = await fetch(`${API_URL}/auth/register/`, {
@@ -8,17 +7,23 @@ const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || 'Erreur lors de l\'inscription');
+    }
     return res.json();
   },
   
   login: async (email, password) => {
-    const res = await fetch(`${API_URL}/auth/login/`, {
+    const res = await fetch(`${API_URL}/token/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error('Identifiants incorrects');
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || 'Identifiants incorrects');
+    }
     return res.json();
   },
   
@@ -27,6 +32,7 @@ const api = {
     const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
+    if (!res.ok) throw new Error('Erreur lors du chargement des hôtels');
     return res.json();
   },
   
@@ -36,7 +42,10 @@ const api = {
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData,
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || 'Erreur lors de la création');
+    }
     return res.json();
   },
   
@@ -53,6 +62,7 @@ const api = {
     const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
+    if (!res.ok) throw new Error('Erreur lors du chargement des messages');
     return res.json();
   },
   
@@ -65,7 +75,10 @@ const api = {
       },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || 'Erreur lors de l\'envoi');
+    }
     return res.json();
   },
   
@@ -74,6 +87,7 @@ const api = {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
     });
+    if (!res.ok) throw new Error('Erreur');
     return res.json();
   },
   
@@ -89,6 +103,7 @@ const api = {
     const res = await fetch(`${API_URL}/auth/users/`, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
+    if (!res.ok) throw new Error('Erreur lors du chargement des utilisateurs');
     return res.json();
   },
 };

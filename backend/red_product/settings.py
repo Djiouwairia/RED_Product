@@ -9,8 +9,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'ueu7_a-h2pj^gg+8tzkvpu2sgu=c$r*zu6l2m
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-
+ALLOWED_HOSTS = [
+    'red-product-api-sjtn.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -99,11 +102,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000'
-).split(',')
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://red-product-frontend-pm6r.onrender.com',
+    'http://localhost:3000',
+]
 
 # REST Framework
 REST_FRAMEWORK = {
