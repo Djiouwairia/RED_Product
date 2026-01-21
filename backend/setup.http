@@ -1,0 +1,42 @@
+### Variables
+@baseUrl = https://red-product-api-sjtn.onrender.com/api
+@secretKey = RED_Product_Setup_2026_Secret!
+
+### 1. Créer le superutilisateur
+POST {{baseUrl}}/auth/setup/create-superuser/
+Content-Type: application/json
+
+{
+  "secret_key": "{{secretKey}}",
+  "email": "admin@redproduct.com",
+  "username": "admin",
+  "password": "AdminRed2026!",
+  "first_name": "Admin",
+  "last_name": "RED Product"
+}
+
+### 2. Créer les données de test
+POST {{baseUrl}}/auth/setup/create-test-data/
+Content-Type: application/json
+
+{
+  "secret_key": "{{secretKey}}"
+}
+
+### 3. Tester la connexion admin
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "email": "admin@redproduct.com",
+  "password": "AdminRed2026!"
+}
+
+### 4. Tester la connexion utilisateur test
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "email": "user@test.com",
+  "password": "TestPass123!"
+}
